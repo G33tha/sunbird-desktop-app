@@ -29,11 +29,11 @@ node() {
 
         stage('Build') {
             sh """
-            docker run -d --name offline_build -w /offline i386/node:8.16.2-stretch sleep infinity
-            docker cp . offline_build:/offline/
-            docker exec offline_build bash -x build.sh
-            docker cp offline_build:/offline/src.tar.gz .
-            docker rm offline_build --force
+            cd src
+            npm install
+            npm run build
+            cd ..
+            tar -czvf src.tar.gz src
             """
         }
 
@@ -52,9 +52,6 @@ node() {
         }
     }
     catch (err) {
-        sh """
-           docker rm offline_build --force
-           """
         currentBuild.result = "FAILURE"
         throw err
     }
